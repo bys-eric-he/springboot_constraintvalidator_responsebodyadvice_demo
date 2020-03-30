@@ -21,11 +21,20 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 统一异常捕获及返回值格式化处理
+ * 我们需要定义一个统一的全局异常来捕获这些信息，并作为一种结果返回控制层。
+ * 注解@ControllerAdvice 是一种作用于控制层的切面通知（Advice）,该注解能够将通用的@ExceptionHandler、@InitBinder和@ModelAttributes方法收集到一个类型，并应用到所有控制器上。
  */
 @ControllerAdvice
 public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
     private final static Logger logger = LoggerFactory.getLogger(ResponseResultHandler.class);
 
+    /**
+     * 使用@ExceptionHandler注解捕获指定或自定义的异常；
+     *
+     * @param request
+     * @param ex
+     * @return
+     */
     @ExceptionHandler({BusinessException.class})
     @ResponseBody
     public ErrorResult handleBizExp(HttpServletRequest request, Exception ex) {
@@ -39,7 +48,7 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
     }
 
     /**
-     * 检查是否请求了带@ResponseResult注解标记的API，有就重写返回体，没有就直接返回。
+     * 重写ResponseBodyAdvice接口方法, 检查是否请求了带@ResponseResult注解标记的API，有就会执行beforeBodyWrite方法，重写返回体，没有就直接返回。
      *
      * @param methodParameter
      * @param aClass
@@ -64,13 +73,13 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
             if (body instanceof ErrorResult) {
                 ErrorResult errorResult = (ErrorResult) body;
                 //ResultCode resultCode = ResultCode.FAILED;
-                return CommonResult.failed(errorResult.getMsg());
+                return CommonResult.failed(errorResult.getMsg()).data(null);
             }
 
         } catch (Exception exception) {
             exception.printStackTrace();
             //ResultCode resultCode = ResultCode.FAILED;
-            return CommonResult.failed(exception.getMessage());
+            return CommonResult.failed(exception.getMessage()).data(null);
         }
 
         return CommonResult.success(body);

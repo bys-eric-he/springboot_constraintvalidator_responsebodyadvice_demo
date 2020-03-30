@@ -46,4 +46,10 @@ public class BrandController {
 
         return brandService.listAllBrand();
     }
+
+    @ApiOperation(value = "获取指定ID品牌")
+    @RequestMapping(value = "/brand/object/{id}", method = RequestMethod.GET)
+    public BrandDto getByName(@PathVariable Long id) throws Exception {
+        return brandService.getBrand(id);
+    }
 }
